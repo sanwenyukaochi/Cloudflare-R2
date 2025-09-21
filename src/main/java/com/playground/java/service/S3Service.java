@@ -33,8 +33,7 @@ public class S3Service {
      * @param uploadId   The upload ID of the multipart upload to abort
      * @return True if the multipart upload is successfully aborted, false otherwise
      */
-    public boolean abortDirectoryBucketMultipartUpload(String bucketName,
-                                                       String objectKey, String uploadId) {
+    public boolean abortDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId) {
         log.info("Aborting multipart upload: {} for bucket: {}", uploadId, bucketName);
         try {
             // Abort the multipart upload
@@ -66,8 +65,7 @@ public class S3Service {
      * @return True if the multipart upload is successfully completed, false
      * otherwise
      */
-    public boolean completeDirectoryBucketMultipartUpload(String bucketName, String objectKey,
-                                                          String uploadId, List<CompletedPart> uploadParts) {
+    public boolean completeDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId, List<CompletedPart> uploadParts) {
         try {
             CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
                     .parts(uploadParts)
@@ -97,8 +95,7 @@ public class S3Service {
      * @param objectKey    The key (name) of the object to be copied
      * @param targetBucket The name of the target bucket
      */
-    public void copyDirectoryBucketObject(String sourceBucket, String objectKey,
-                                          String targetBucket) {
+    public void copyDirectoryBucketObject(String sourceBucket, String objectKey, String targetBucket) {
         log.info("Copying object: {} from bucket: {} to bucket: {}", objectKey, sourceBucket, targetBucket);
 
         try {
@@ -605,8 +602,7 @@ public class S3Service {
      * @param uploadId   The upload ID used to track the multipart upload
      * @return A list of Part representing the parts of the multipart upload
      */
-    public List<Part> listDirectoryBucketMultipartUploadParts(String bucketName,
-                                                              String objectKey, String uploadId) {
+    public List<Part> listDirectoryBucketMultipartUploadParts(String bucketName, String objectKey, String uploadId) {
         log.info("Listing parts for object: {} in bucket: {}", objectKey, bucketName);
 
         try {
@@ -767,8 +763,7 @@ public class S3Service {
      * @return A list of uploaded parts
      * @throws IOException if an I/O error occurs
      */
-    public List<CompletedPart> multipartUploadForDirectoryBucket(String bucketName,
-                                                                 String objectKey, String uploadId, Path filePath) throws IOException {
+    public List<CompletedPart> multipartUploadForDirectoryBucket(String bucketName, String objectKey, String uploadId, Path filePath) throws IOException {
         log.info("Uploading parts for object: {} in bucket: {}", objectKey, bucketName);
 
         int partNumber = 1;
@@ -832,8 +827,7 @@ public class S3Service {
      * @param uploadId          The upload ID used to track the multipart upload
      * @return A list of completed parts
      */
-    public List<CompletedPart> multipartUploadCopyForDirectoryBucket(String sourceBucket,
-                                                                     String sourceKey, String destinationBucket, String destinationKey, String uploadId) {
+    public List<CompletedPart> multipartUploadCopyForDirectoryBucket(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey, String uploadId) {
         // Get the object size to track the end of the copy operation
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                 .bucket(sourceBucket)
