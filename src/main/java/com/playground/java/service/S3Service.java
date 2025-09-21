@@ -98,7 +98,7 @@ public class S3Service {
      * @param targetBucket The name of the target bucket
      */
     public void copyDirectoryBucketObject(String sourceBucket, String objectKey,
-                                                 String targetBucket) {
+                                          String targetBucket) {
         log.info("Copying object: {} from bucket: {} to bucket: {}", objectKey, sourceBucket, targetBucket);
 
         try {
@@ -121,6 +121,7 @@ public class S3Service {
             throw e;
         }
     }
+
     /**
      * Creates a new S3 directory bucket in a specified Zone (For example, a
      * specified Availability Zone in this code example).
@@ -153,6 +154,7 @@ public class S3Service {
             throw e;
         }
     }
+
     /**
      * This method creates a multipart upload request that generates a unique upload
      * ID used to track
@@ -321,7 +323,7 @@ public class S3Service {
      *
      * @param bucketName The name of the directory bucket
      * @return The type of server-side encryption applied to the bucket (e.g.,
-     *         AES256, aws:kms)
+     * AES256, aws:kms)
      */
     public String getDirectoryBucketEncryption(String bucketName) {
         try {
@@ -346,6 +348,7 @@ public class S3Service {
             throw e;
         }
     }
+
     /**
      * Retrieves the bucket policy for the specified S3 directory bucket.
      *
@@ -375,6 +378,7 @@ public class S3Service {
             throw e;
         }
     }
+
     /**
      * Retrieves an object from the specified S3 directory bucket.
      *
@@ -415,7 +419,7 @@ public class S3Service {
      * @param bucketName The name of the directory bucket
      * @param objectKey  The key (name) of the object to retrieve attributes for
      * @return True if the object attributes are successfully retrieved, false
-     *         otherwise
+     * otherwise
      */
     public boolean getDirectoryBucketObjectAttributes(String bucketName, String objectKey) {
         log.info("Retrieving attributes for object: {} from bucket: {}", objectKey, bucketName);
@@ -443,6 +447,7 @@ public class S3Service {
             return false;
         }
     }
+
     /**
      * Checks if the specified S3 directory bucket exists and is accessible.
      *
@@ -561,6 +566,7 @@ public class S3Service {
             return List.of(); // Return an empty list if an exception is thrown
         }
     }
+
     /**
      * Lists objects in the specified S3 directory bucket.
      *
@@ -590,6 +596,7 @@ public class S3Service {
             throw e;
         }
     }
+
     /**
      * Lists the parts of a multipart upload for the specified S3 directory bucket.
      *
@@ -599,7 +606,7 @@ public class S3Service {
      * @return A list of Part representing the parts of the multipart upload
      */
     public List<Part> listDirectoryBucketMultipartUploadParts(String bucketName,
-                                                                     String objectKey, String uploadId) {
+                                                              String objectKey, String uploadId) {
         log.info("Listing parts for object: {} in bucket: {}", objectKey, bucketName);
 
         try {
@@ -672,9 +679,9 @@ public class S3Service {
 
     /**
      * Sets the following bucket policy for the specified S3 directory bucket.
-     *<pre>
+     * <pre>
      * {
-     *     "Version": "2012-10-17",		 	 	 
+     *     "Version": "2012-10-17",
      *     "Statement": [
      *         {
      *             "Sid": "AdminPolicy",
@@ -761,7 +768,7 @@ public class S3Service {
      * @throws IOException if an I/O error occurs
      */
     public List<CompletedPart> multipartUploadForDirectoryBucket(String bucketName,
-                                                                        String objectKey, String uploadId, Path filePath) throws IOException {
+                                                                 String objectKey, String uploadId, Path filePath) throws IOException {
         log.info("Uploading parts for object: {} in bucket: {}", objectKey, bucketName);
 
         int partNumber = 1;
@@ -826,7 +833,7 @@ public class S3Service {
      * @return A list of completed parts
      */
     public List<CompletedPart> multipartUploadCopyForDirectoryBucket(String sourceBucket,
-                                                                            String sourceKey, String destinationBucket, String destinationKey, String uploadId) {
+                                                                     String sourceKey, String destinationBucket, String destinationKey, String uploadId) {
         // Get the object size to track the end of the copy operation
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                 .bucket(sourceBucket)
