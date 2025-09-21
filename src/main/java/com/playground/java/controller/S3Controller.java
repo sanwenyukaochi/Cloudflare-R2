@@ -2,9 +2,7 @@ package com.playground.java.controller;
 
 import com.playground.java.service.S3Service;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -14,13 +12,18 @@ public class S3Controller {
 
     private final S3Service s3Service;
 
-    @GetMapping("/buckets")
-    public List<String> getBuckets() {
+    @PostMapping("/createDirectoryBucket/{bucketName}")
+    public void createDirectoryBucket(@PathVariable String bucketName, @RequestParam(defaultValue = "auto") String zone) {
+        s3Service.createDirectoryBucket(bucketName, zone);
+    }
+    
+    @GetMapping("/listDirectoryBuckets")
+    public List<String> listDirectoryBuckets() {
         return s3Service.listDirectoryBuckets();
     }
 
-    @GetMapping("/buckets/{bucketName}/objects")
-    public List<String> getObjects(@PathVariable String bucketName) {
+    @GetMapping("/listDirectoryBucketObjectsV2/{bucketName}")
+    public List<String> listDirectoryBucketObjectsV2(@PathVariable String bucketName) {
         return s3Service.listDirectoryBucketObjectsV2(bucketName);
     }
 }
