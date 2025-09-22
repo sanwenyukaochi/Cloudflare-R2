@@ -515,10 +515,10 @@ public class S3ServiceImpl implements S3Service {
 
         try {
             // Create a ListBucketsRequest
-            ListDirectoryBucketsRequest listDirectoryBucketsRequest = ListDirectoryBucketsRequest.builder().build();
+            ListBucketsRequest listBucketsRequest = ListBucketsRequest.builder().build();
 
             // Retrieve the list of buckets
-            ListDirectoryBucketsResponse response = s3Client.listDirectoryBuckets(listDirectoryBucketsRequest);
+            ListBucketsResponse response = s3Client.listBuckets(listBucketsRequest);
 
             // Extract bucket names
             List<String> bucketNames = response.buckets().stream()
