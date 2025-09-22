@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class JavaPlaygroundApplication {
+public class S3Application {
 
 	public static void main(String[] args) {
-		SpringApplication.run(JavaPlaygroundApplication.class, args);
+		SpringApplication.run(S3Application.class, args);
 	}
 
 }
