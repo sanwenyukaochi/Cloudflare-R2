@@ -1,4 +1,4 @@
-package com.playground.java.requests;
+package com.cloudflare.storage.requests;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.NoArgsConstructor;

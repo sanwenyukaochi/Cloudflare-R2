@@ -1,4 +1,4 @@
-package com.playground.java.service;
+package com.cloudflare.storage.service;
 
 import software.amazon.awssdk.services.s3.model.CompletedPart;
 import software.amazon.awssdk.services.s3.model.MultipartUpload;

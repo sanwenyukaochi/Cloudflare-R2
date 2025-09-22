@@ -1,4 +1,4 @@
-package com.playground.java.service;
+package com.cloudflare.storage.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -52,7 +52,6 @@ public class S3ServiceImpl implements S3Service {
             return false;
         }
     }
-
 
     /**
      * This method completes the multipart upload request by collating all the

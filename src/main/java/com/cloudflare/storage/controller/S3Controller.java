@@ -1,8 +1,7 @@
-package com.playground.java.controller;
+package com.cloudflare.storage.controller;
 
-
-import com.playground.java.requests.BucketRequests.*;
-import com.playground.java.service.S3Service;
+import com.cloudflare.storage.requests.BucketRequests.*;
+import com.cloudflare.storage.service.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.s3.model.CompletedPart;

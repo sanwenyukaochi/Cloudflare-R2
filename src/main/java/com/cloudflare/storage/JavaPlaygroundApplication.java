@@ -1,4 +1,4 @@
-package com.playground.java;
+package com.cloudflare.storage;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
