@@ -1,4 +1,4 @@
-package com.playground.java.config;
+package com.cloudflare.storage.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
