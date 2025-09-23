@@ -109,4 +109,4 @@ Cloudflare-R2/
 如需定制化开发或技术支持，请联系作者：
 
 * GitHub: [sanwenyukaochi](https://github.com/sanwenyukaochi)
-* 邮箱: `your-email@example.com`
+* 邮箱: `sanwenyukaochi@outlook.com`
