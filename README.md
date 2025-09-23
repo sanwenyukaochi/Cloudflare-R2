@@ -59,9 +59,9 @@ cd Cloudflare-R2
 在 `src/main/resources/application.properties` 中配置：
 
 ```properties
+cloudflare.account-id=<你的AccountId>
 cloudflare.r2.accessKey=<你的AccessKey>
 cloudflare.r2.secretKey=<你的SecretKey>
-cloudflare.r2.endpoint=<R2 Endpoint>
 ```
 
 ---
