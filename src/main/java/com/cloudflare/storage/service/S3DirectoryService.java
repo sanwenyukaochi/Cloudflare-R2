@@ -6,7 +6,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
-public interface S3Service  {
+public interface S3DirectoryService {
     boolean abortDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId);
     boolean completeDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId, List<CompletedPart> uploadParts);
     void copyDirectoryBucketObject(String sourceBucket, String sourceObjectKey, String targetBucket, String targetObjectKey);
