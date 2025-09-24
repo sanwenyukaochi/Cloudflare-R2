@@ -33,6 +33,7 @@ public class S3ServiceImpl implements S3Service {
      * @param uploadId   The upload ID of the multipart upload to abort
      * @return True if the multipart upload is successfully aborted, false otherwise
      */
+    @Override
     public boolean abortDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId) {
         log.info("Aborting multipart upload: {} for bucket: {}", uploadId, bucketName);
         try {
@@ -64,6 +65,7 @@ public class S3ServiceImpl implements S3Service {
      * @return True if the multipart upload is successfully completed, false
      * otherwise
      */
+    @Override
     public boolean completeDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId, List<CompletedPart> uploadParts) {
         try {
             CompletedMultipartUpload completedMultipartUpload = CompletedMultipartUpload.builder()
@@ -94,6 +96,7 @@ public class S3ServiceImpl implements S3Service {
      * @param objectKey    The key (name) of the object to be copied
      * @param targetBucket The name of the target bucket
      */
+    @Override
     public void copyDirectoryBucketObject(String sourceBucket, String objectKey, String targetBucket) {
         log.info("Copying object: {} from bucket: {} to bucket: {}", objectKey, sourceBucket, targetBucket);
 
@@ -126,6 +129,7 @@ public class S3ServiceImpl implements S3Service {
      * @param zone       The region where the bucket will be created
      * @throws S3Exception if there's an error creating the bucket
      */
+    @Override
     public void createDirectoryBucket(String bucketName, String zone) throws S3Exception {
         log.info("Creating bucket: {}", bucketName);
 
@@ -160,6 +164,7 @@ public class S3ServiceImpl implements S3Service {
      * @param objectKey  The key (name) of the object to be uploaded
      * @return The upload ID used to track the multipart upload
      */
+    @Override
     public String createDirectoryBucketMultipartUpload(String bucketName, String objectKey) {
         log.info("Creating multipart upload for object: {} in bucket: {}", objectKey, bucketName);
 
@@ -188,6 +193,7 @@ public class S3ServiceImpl implements S3Service {
      *
      * @param bucketName The name of the directory bucket to delete
      */
+    @Override
     public void deleteDirectoryBucket(String bucketName) {
         log.info("Deleting bucket: {}", bucketName);
 
@@ -213,6 +219,7 @@ public class S3ServiceImpl implements S3Service {
      *
      * @param bucketName The name of the directory bucket
      */
+    @Override
     public void deleteDirectoryBucketEncryption(String bucketName) {
         DeleteBucketEncryptionRequest deleteRequest = DeleteBucketEncryptionRequest.builder()
                 .bucket(bucketName)
@@ -233,6 +240,7 @@ public class S3ServiceImpl implements S3Service {
      *
      * @param bucketName The name of the directory bucket
      */
+    @Override
     public void deleteDirectoryBucketPolicy(String bucketName) {
         log.info("Deleting policy for bucket: {}", bucketName);
 
@@ -259,6 +267,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @param objectKey  The key (name) of the object to be deleted
      */
+    @Override
     public void deleteDirectoryBucketObject(String bucketName, String objectKey) {
         log.info("Deleting object: {} from bucket: {}", objectKey, bucketName);
 
@@ -286,6 +295,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @param objectKeys The list of keys (names) of the objects to be deleted
      */
+    @Override
     public void deleteDirectoryBucketObjects(String bucketName, List<String> objectKeys) {
         log.info("Deleting objects from bucket: {}", bucketName);
 
@@ -321,6 +331,7 @@ public class S3ServiceImpl implements S3Service {
      * @return The type of server-side encryption applied to the bucket (e.g.,
      * AES256, aws:kms)
      */
+    @Override
     public String getDirectoryBucketEncryption(String bucketName) {
         try {
             // Create a GetBucketEncryptionRequest
@@ -351,6 +362,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @return The bucket policy text
      */
+    @Override
     public String getDirectoryBucketPolicy(String bucketName) {
         log.info("Getting policy for bucket: {}", bucketName);
 
@@ -382,6 +394,7 @@ public class S3ServiceImpl implements S3Service {
      * @param objectKey  The key (name) of the object to be retrieved
      * @return The retrieved object as a ResponseInputStream
      */
+    @Override
     public boolean getDirectoryBucketObject(String bucketName, String objectKey) {
         log.info("Retrieving object: {} from bucket: {}", objectKey, bucketName);
 
@@ -417,6 +430,7 @@ public class S3ServiceImpl implements S3Service {
      * @return True if the object attributes are successfully retrieved, false
      * otherwise
      */
+    @Override
     public boolean getDirectoryBucketObjectAttributes(String bucketName, String objectKey) {
         log.info("Retrieving attributes for object: {} from bucket: {}", objectKey, bucketName);
 
@@ -450,6 +464,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket to check
      * @return True if the bucket exists and is accessible, false otherwise
      */
+    @Override
     public boolean headDirectoryBucket(String bucketName) {
         log.info("Checking if bucket exists: {}", bucketName);
 
@@ -478,6 +493,7 @@ public class S3ServiceImpl implements S3Service {
      * @param objectKey  The key (name) of the object to retrieve metadata for
      * @return True if the object exists, false otherwise
      */
+    @Override
     public boolean headDirectoryBucketObject(String bucketName, String objectKey) {
         log.info("Retrieving metadata for object: {} from bucket: {}", objectKey, bucketName);
 
@@ -509,6 +525,7 @@ public class S3ServiceImpl implements S3Service {
      *
      * @return A list of bucket names
      */
+    @Override
     public List<String> listDirectoryBuckets() {
         log.info("Listing all directory buckets");
 
@@ -538,6 +555,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @return A list of MultipartUpload objects representing the multipart uploads
      */
+    @Override
     public List<MultipartUpload> listDirectoryBucketMultipartUploads(String bucketName) {
         log.info("Listing in-progress multipart uploads for bucket: {}", bucketName);
 
@@ -569,6 +587,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @return A list of object keys in the bucket
      */
+    @Override
     public List<String> listDirectoryBucketObjectsV2(String bucketName) {
         log.info("Listing objects in bucket: {}", bucketName);
 
@@ -601,6 +620,7 @@ public class S3ServiceImpl implements S3Service {
      * @param uploadId   The upload ID used to track the multipart upload
      * @return A list of Part representing the parts of the multipart upload
      */
+    @Override
     public List<Part> listDirectoryBucketMultipartUploadParts(String bucketName, String objectKey, String uploadId) {
         log.info("Listing parts for object: {} in bucket: {}", objectKey, bucketName);
 
@@ -633,6 +653,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @param kmsKeyId   The ID of the customer-managed KMS key
      */
+    @Override
     public void putDirectoryBucketEncryption(String bucketName, String kmsKeyId) {
         // Define the default encryption configuration to use SSE-KMS. For directory
         // buckets, AWS managed KMS keys aren't supported. Only customer-managed keys
@@ -695,6 +716,7 @@ public class S3ServiceImpl implements S3Service {
      * @param bucketName The name of the directory bucket
      * @param policyText The policy text to be applied
      */
+    @Override
     public void putDirectoryBucketPolicy(String bucketName, String policyText) {
         log.info("Setting policy on bucket: {}", bucketName);
         log.info("Policy: {}", policyText);
@@ -722,6 +744,7 @@ public class S3ServiceImpl implements S3Service {
      * @param objectKey  The key (name) of the object to be placed in the bucket
      * @param filePath   The path of the file to be uploaded
      */
+    @Override
     public void putDirectoryBucketObject(String bucketName, String objectKey, Path filePath) {
         log.info("Putting object: {} into bucket: {}", objectKey, bucketName);
 
@@ -762,6 +785,7 @@ public class S3ServiceImpl implements S3Service {
      * @return A list of uploaded parts
      * @throws IOException if an I/O error occurs
      */
+    @Override
     public List<CompletedPart> multipartUploadForDirectoryBucket(String bucketName, String objectKey, String uploadId, Path filePath) throws IOException {
         log.info("Uploading parts for object: {} in bucket: {}", objectKey, bucketName);
 
@@ -826,6 +850,7 @@ public class S3ServiceImpl implements S3Service {
      * @param uploadId          The upload ID used to track the multipart upload
      * @return A list of completed parts
      */
+    @Override
     public List<CompletedPart> multipartUploadCopyForDirectoryBucket(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey, String uploadId) {
         // Get the object size to track the end of the copy operation
         HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
