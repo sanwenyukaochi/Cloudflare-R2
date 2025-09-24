@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class S3ServiceImpl implements S3Service {
+public class S3DirectoryServiceImpl implements S3DirectoryService {
     private final S3Client s3Client;
 
     /**

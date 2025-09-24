@@ -11,7 +11,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 @NoArgsConstructor
-public final class BucketRequests {
+public final class S3DirectoryRequests {
     public record AbortMultipartUploadRequest(@NotBlank String bucketName, @NotBlank String objectKey, @NotBlank @NotNull @Size(min = 1)String uploadId) {}
     public record CompleteMultipartUploadRequest(@NotBlank String bucketName, @NotBlank String objectKey, @NotBlank String uploadId, List<CompletedPart> uploadParts) {}
     public record CopyObjectRequest(@NotBlank String sourceBucket, @NotBlank String sourceObjectKey, @NotBlank String targetBucket, @NotBlank String targetObjectKey) {}
