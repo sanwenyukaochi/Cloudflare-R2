@@ -93,30 +93,31 @@ public class S3ServiceImpl implements S3Service {
      * bucket.
      *
      * @param sourceBucket The name of the source bucket
-     * @param objectKey    The key (name) of the object to be copied
+     * @param sourceObjectKey  The key (name) of the source object
      * @param targetBucket The name of the target bucket
+     * @param targetObjectKey  The key (name) of the target object
      */
     @Override
-    public void copyDirectoryBucketObject(String sourceBucket, String objectKey, String targetBucket) {
-        log.info("Copying object: {} from bucket: {} to bucket: {}", objectKey, sourceBucket, targetBucket);
+    public void copyDirectoryBucketObject(String sourceBucket, String sourceObjectKey, String targetBucket, String targetObjectKey) {
+        log.info("Copying object: {} from bucket: {} to bucket: {} with new key: {}", sourceObjectKey, sourceBucket, targetBucket, targetObjectKey);
 
         try {
             // Create a CopyObjectRequest
             CopyObjectRequest copyReq = CopyObjectRequest.builder()
                     .sourceBucket(sourceBucket)
-                    .sourceKey(objectKey)
+                    .sourceKey(sourceObjectKey)
                     .destinationBucket(targetBucket)
-                    .destinationKey(objectKey)
+                    .destinationKey(targetObjectKey)
                     .build();
 
             // Copy the object
             CopyObjectResponse copyRes = s3Client.copyObject(copyReq);
-            log.info("Successfully copied {} from bucket {} into bucket {}. CopyObjectResponse: {}",
-                    objectKey, sourceBucket, targetBucket, copyRes.copyObjectResult().toString());
+            log.info("Successfully copied {} from bucket {} into bucket {} as {}. CopyObjectResponse: {}",
+                    sourceObjectKey, sourceBucket, targetBucket, targetObjectKey, copyRes.copyObjectResult().toString());
 
         } catch (S3Exception e) {
-            log.error("Failed to copy object: {} - Error code: {}", e.awsErrorDetails().errorMessage(),
-                    e.awsErrorDetails().errorCode(), e);
+            log.error("Failed to copy object: {} from bucket {} to bucket {} - Error code: {}, message: {}", sourceObjectKey, sourceBucket, targetBucket,
+                    e.awsErrorDetails().errorCode(), e.awsErrorDetails().errorMessage(), e);
             throw e;
         }
     }

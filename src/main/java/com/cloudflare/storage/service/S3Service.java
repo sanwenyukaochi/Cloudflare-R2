@@ -1,9 +1,6 @@
 package com.cloudflare.storage.service;
 
-import software.amazon.awssdk.services.s3.model.CompletedPart;
-import software.amazon.awssdk.services.s3.model.MultipartUpload;
-import software.amazon.awssdk.services.s3.model.Part;
-import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -12,7 +9,7 @@ import java.util.List;
 public interface S3Service  {
     boolean abortDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId);
     boolean completeDirectoryBucketMultipartUpload(String bucketName, String objectKey, String uploadId, List<CompletedPart> uploadParts);
-    void copyDirectoryBucketObject(String sourceBucket, String objectKey, String targetBucket);
+    void copyDirectoryBucketObject(String sourceBucket, String sourceObjectKey, String targetBucket, String targetObjectKey);
     void createDirectoryBucket(String bucketName, String zone) throws S3Exception;
     String createDirectoryBucketMultipartUpload(String bucketName, String objectKey);
     void deleteDirectoryBucket(String bucketName);
