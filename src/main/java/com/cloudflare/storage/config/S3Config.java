@@ -1,5 +1,6 @@
 package com.cloudflare.storage.config;
 
+import com.cloudflare.storage.constant.S3Constants;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +38,7 @@ public class S3Config {
         return S3Client.builder()
                 .endpointOverride(URI.create(String.format("https://%s.r2.cloudflarestorage.com", accountId)))
                 .credentialsProvider(StaticCredentialsProvider.create(credentials))
-                .region(Region.of("auto"))
+                .region(Region.of(S3Constants.AUTO))
                 .serviceConfiguration(serviceConfiguration)
                 .build();
     }
