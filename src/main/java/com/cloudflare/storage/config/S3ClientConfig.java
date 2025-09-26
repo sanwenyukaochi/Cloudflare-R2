@@ -13,7 +13,7 @@ import software.amazon.awssdk.services.s3.S3Configuration;
 import java.net.URI;
 
 @Configuration
-public class S3Config {
+public class S3ClientConfig {
 
     @Value("${cloudflare.account-id}")
     private String accountId;
