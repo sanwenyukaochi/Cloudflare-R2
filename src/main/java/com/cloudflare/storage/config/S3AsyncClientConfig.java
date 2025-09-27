@@ -13,6 +13,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3AsyncClient;
 import software.amazon.awssdk.http.nio.netty.NettyNioAsyncHttpClient;
 import software.amazon.awssdk.services.s3.S3Configuration;
+import software.amazon.awssdk.transfer.s3.S3TransferManager;
 
 import java.net.URI;
 import java.time.Duration;
@@ -61,6 +62,13 @@ public class S3AsyncClientConfig {
                 .serviceConfiguration(serviceConfiguration)
                 .httpClient(httpClient)
                 .overrideConfiguration(overrideConfig)
+                .build();
+    }
+
+    @Bean
+    public S3TransferManager s3TransferManager(S3AsyncClient s3AsyncClient) {
+        return S3TransferManager.builder()
+                .s3Client(s3AsyncClient)
                 .build();
     }
 }
