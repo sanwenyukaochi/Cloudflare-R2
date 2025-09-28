@@ -37,11 +37,10 @@ public class Result<T> {
                 .build();
     }
 
-    public static <T> Result<T> error(ResultCode resultCode, T data) {
+    public static <T> Result<T> error(ResultCode resultCode) {
         return Result.<T>builder()
                 .code(resultCode.getCode())
                 .msg(resultCode.getMsg())
-                .data(data)
                 .build();
     }
 
