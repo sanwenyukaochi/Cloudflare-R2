@@ -18,22 +18,29 @@ repositories {
 	mavenCentral()
 }
 
+ext {
+	set('awsSdkVersion', "2.34.0")
+	set('springdocVersion', "2.8.9")
+	set('commonsLangVersion', "3.18.0")
+	set('hutoolVersion', "5.8.40")
+}
+
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	developmentOnly 'org.springframework.boot:spring-boot-devtools'
-	implementation 'software.amazon.awssdk:s3:2.34.0'
-	implementation 'software.amazon.awssdk:s3-transfer-manager:2.34.0'
-	implementation 'software.amazon.awssdk:netty-nio-client:2.34.0'
-	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
-	implementation 'org.apache.commons:commons-lang3:3.18.0'
-	implementation 'cn.hutool:hutool-all:5.8.40'
+	implementation "software.amazon.awssdk:s3:${awsSdkVersion}"
+	implementation "software.amazon.awssdk:s3-transfer-manager:${awsSdkVersion}"
+	implementation "software.amazon.awssdk:netty-nio-client:${awsSdkVersion}"
+	implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
+	implementation "org.apache.commons:commons-lang3:${commonsLangVersion}"
+	implementation "cn.hutool:hutool-all:${hutoolVersion}"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
-tasks.named('test') {
+tasks.withType(Test).configureEach {
 	useJUnitPlatform()
 }
