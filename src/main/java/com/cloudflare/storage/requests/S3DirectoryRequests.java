@@ -37,4 +37,5 @@ public final class S3DirectoryRequests {
     public record PutObjectRequest(@NotBlank String bucketName, @NotBlank String objectKey, @NotNull Path filePath) {}
     public record MultipartUploadRequest(@NotBlank String bucketName, @NotBlank String objectKey, @NotBlank String uploadId, @NotNull Path filePath) {}
     public record MultipartUploadCopyRequest(@NotBlank String sourceBucket, @NotBlank String sourceKey, @NotBlank String destinationBucket, @NotBlank String destinationKey, @NotBlank String uploadId) {}
+    public record GetObjectUrlRequest(@NotBlank String bucketName, @NotBlank String objectKey) {}
 }

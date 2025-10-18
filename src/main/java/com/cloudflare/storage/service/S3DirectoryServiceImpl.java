@@ -1,20 +1,25 @@
 package com.cloudflare.storage.service;
 
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.core.sync.ResponseTransformer;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 
-import java.io.IOException;
-import java.io.RandomAccessFile;
-import java.io.UncheckedIOException;
+import java.io.*;
+import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -902,4 +907,583 @@ public class S3DirectoryServiceImpl implements S3DirectoryService {
 
         return uploadedParts;
     }
+
+    /**
+     * Retrieves the URL for a specific object in an Amazon S3 bucket.
+     *
+     * @param bucketName the name of the S3 bucket where the object is stored
+     * @param keyName the name of the object for which the URL should be retrieved
+     * @throws S3Exception if there is an error retrieving the URL for the specified object
+     */
+    @Override
+    public String getObjectUrlForDirectoryBucket(String bucketName, String keyName) {
+        try {
+            GetUrlRequest request = GetUrlRequest.builder()
+                    .bucket(bucketName)
+                    .key(keyName)
+                    .build();
+
+            URL url = s3Client.utilities().getUrl(request);
+            log.info("The URL for  {} is {}", keyName, url);
+            return url.toString();
+        } catch (S3Exception e) {
+            log.error(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+            return null;
+        }
+    }
+
+    /**
+     * Lists the tags associated with an Amazon S3 object.
+     *
+     * @param bucketName the name of the S3 bucket that contains the object
+     * @param keyName the key (name) of the S3 object
+     */
+    @Override
+    public void listTags(String bucketName, String keyName) {
+        try {
+            GetObjectTaggingRequest getTaggingRequest = GetObjectTaggingRequest
+                    .builder()
+                    .key(keyName)
+                    .bucket(bucketName)
+                    .build();
+
+            GetObjectTaggingResponse tags = s3Client.getObjectTagging(getTaggingRequest);
+            List<Tag> tagSet = tags.tagSet();
+            for (Tag tag : tagSet) {
+                System.out.println(tag.key());
+                System.out.println(tag.value());
+            }
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Retrieves the bytes of an object stored in an Amazon S3 bucket and saves them to a local file.
+     *
+     * @param bucketName The name of the S3 bucket where the object is stored.
+     * @param keyName The key (or name) of the S3 object.
+     * @param path The local file path where the object's bytes will be saved.
+     * @throws S3Exception If an error occurs while retrieving the object from the S3 bucket.
+     */
+    @Override
+    public void getObjectBytes(String bucketName, String keyName, String path) {
+        try {
+            GetObjectRequest objectRequest = GetObjectRequest
+                    .builder()
+                    .key(keyName)
+                    .bucket(bucketName)
+                    .build();
+
+            ResponseBytes<GetObjectResponse> objectBytes = s3Client.getObject(objectRequest, ResponseTransformer.toBytes());
+            byte[] data = objectBytes.asByteArray();
+
+            // Write the data to a local file.
+            File myFile = new File(path);
+            OutputStream os = new FileOutputStream(myFile);
+            os.write(data);
+            System.out.println("Successfully obtained bytes from an S3 object");
+            os.close();
+
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    // Get the legal hold details for an S3 object.
+    @Override
+    public ObjectLockLegalHold getObjectLegalHold(String bucketName, String objectKey) {
+        try {
+            GetObjectLegalHoldRequest legalHoldRequest = GetObjectLegalHoldRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .build();
+
+            GetObjectLegalHoldResponse response = s3Client.getObjectLegalHold(legalHoldRequest);
+            System.out.println("Object legal hold for " + objectKey + " in " + bucketName +
+                    ":\n\tStatus: " + response.legalHold().status());
+            return response.legalHold();
+
+        } catch (S3Exception ex) {
+            System.out.println("\tUnable to fetch legal hold: '" + ex.getMessage() + "'");
+        }
+
+        return null;
+    }
+
+    // Get the object lock configuration details for an S3 bucket.
+    @Override
+    public void getBucketObjectLockConfiguration(String bucketName) {
+        GetObjectLockConfigurationRequest objectLockConfigurationRequest = GetObjectLockConfigurationRequest.builder()
+                .bucket(bucketName)
+                .build();
+
+        GetObjectLockConfigurationResponse response = s3Client.getObjectLockConfiguration(objectLockConfigurationRequest);
+        System.out.println("Bucket object lock config for "+bucketName +":  ");
+        System.out.println("\tEnabled: "+response.objectLockConfiguration().objectLockEnabled());
+        System.out.println("\tRule: "+ response.objectLockConfiguration().rule().defaultRetention());
+    }
+
+    // Get the retention period for an S3 object.
+    @Override
+    public ObjectLockRetention getObjectRetention(String bucketName, String key){
+        try {
+            GetObjectRetentionRequest retentionRequest = GetObjectRetentionRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            GetObjectRetentionResponse response = s3Client.getObjectRetention(retentionRequest);
+            System.out.println("tObject retention for "+key +" in "+ bucketName +": " + response.retention().mode() +" until "+ response.retention().retainUntilDate() +".");
+            return response.retention();
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            return null;
+        }
+    }
+
+    /**
+     * Lists the objects in the specified S3 bucket.
+     *
+     * @param bucketName the name of the S3 bucket to list the objects from
+     */
+    @Override
+    public void listBucketObjects(String bucketName) {
+        try {
+            ListObjectsV2Request listReq = ListObjectsV2Request.builder()
+                    .bucket(bucketName)
+                    .maxKeys(1)
+                    .build();
+
+            ListObjectsV2Iterable listRes = s3Client.listObjectsV2Paginator(listReq);
+            listRes.stream()
+                    .flatMap(r -> r.contents().stream())
+                    .forEach(content -> System.out.println(" Key: " + content.key() + " size = " + content.size()));
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sets the Access Control List (ACL) for an Amazon S3 bucket.
+     *
+     * @param bucketName the name of the S3 bucket to set the ACL for
+     * @param id the ID of the AWS user or account that will be granted full control of the bucket
+     * @throws S3Exception if an error occurs while setting the bucket ACL
+     */
+    @Override
+    public void setBucketAcl(String bucketName, String id) {
+        try {
+            Grant ownerGrant = Grant.builder()
+                    .grantee(builder -> builder.id(id)
+                            .type(Type.CANONICAL_USER))
+                    .permission(Permission.FULL_CONTROL)
+                    .build();
+
+            List<Grant> grantList2 = new ArrayList<>();
+            grantList2.add(ownerGrant);
+
+            AccessControlPolicy acl = AccessControlPolicy.builder()
+                    .owner(builder -> builder.id(id))
+                    .grants(grantList2)
+                    .build();
+
+            PutBucketAclRequest putAclReq = PutBucketAclRequest.builder()
+                    .bucket(bucketName)
+                    .accessControlPolicy(acl)
+                    .build();
+
+            s3Client.putBucketAcl(putAclReq);
+
+        } catch (S3Exception e) {
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Deletes the CORS (Cross-Origin Resource Sharing) configuration for an Amazon S3 bucket.
+     *
+     * @param bucketName    the name of the Amazon S3 bucket for which the CORS configuration should be deleted
+     * @param accountId     the expected AWS account ID of the bucket owner
+     *
+     * @throws S3Exception if an error occurs while deleting the CORS configuration for the bucket
+     */
+    @Override
+    public void deleteBucketCorsInformation(String bucketName, String accountId) {
+        try {
+            DeleteBucketCorsRequest bucketCorsRequest = DeleteBucketCorsRequest.builder()
+                    .bucket(bucketName)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            s3Client.deleteBucketCors(bucketCorsRequest);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Retrieves the CORS (Cross-Origin Resource Sharing) configuration for the specified S3 bucket.
+     *
+     * @param bucketName the name of the S3 bucket to retrieve the CORS configuration for
+     * @param accountId the expected bucket owner's account ID
+     *
+     * @throws S3Exception if there is an error retrieving the CORS configuration
+     */
+    @Override
+    public void getBucketCorsInformation(String bucketName, String accountId) {
+        try {
+            GetBucketCorsRequest bucketCorsRequest = GetBucketCorsRequest.builder()
+                    .bucket(bucketName)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            GetBucketCorsResponse corsResponse = s3Client.getBucketCors(bucketCorsRequest);
+            List<CORSRule> corsRules = corsResponse.corsRules();
+            for (CORSRule rule : corsRules) {
+                System.out.println("allowOrigins: " + rule.allowedOrigins());
+                System.out.println("AllowedMethod: " + rule.allowedMethods());
+            }
+
+        } catch (S3Exception e) {
+
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sets the Cross-Origin Resource Sharing (CORS) rules for an Amazon S3 bucket.
+     *
+     * @param bucketName The name of the S3 bucket to set the CORS rules for.
+     * @param accountId The AWS account ID of the bucket owner.
+     */
+    @Override
+    public void setCorsInformation(String bucketName, String accountId) {
+        List<String> allowMethods = new ArrayList<>();
+        allowMethods.add("PUT");
+        allowMethods.add("POST");
+        allowMethods.add("DELETE");
+
+        List<String> allowOrigins = new ArrayList<>();
+        allowOrigins.add("http://example.com");
+        try {
+            // Define CORS rules.
+            CORSRule corsRule = CORSRule.builder()
+                    .allowedMethods(allowMethods)
+                    .allowedOrigins(allowOrigins)
+                    .build();
+
+            List<CORSRule> corsRules = new ArrayList<>();
+            corsRules.add(corsRule);
+            CORSConfiguration configuration = CORSConfiguration.builder()
+                    .corsRules(corsRules)
+                    .build();
+
+            PutBucketCorsRequest putBucketCorsRequest = PutBucketCorsRequest.builder()
+                    .bucket(bucketName)
+                    .corsConfiguration(configuration)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            s3Client.putBucketCors(putBucketCorsRequest);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sets the lifecycle configuration for an Amazon S3 bucket.
+     *
+     * @param bucketName   The name of the Amazon S3 bucket.
+     * @param accountId    The expected owner of the Amazon S3 bucket.
+     *
+     * @throws S3Exception if there is an error setting the lifecycle configuration.
+     */
+    @Override
+    public void setLifecycleConfig(String bucketName, String accountId) {
+        try {
+            // Create a rule to archive objects with the "glacierobjects/" prefix to the
+            // S3 Glacier Flexible Retrieval storage class immediately.
+            LifecycleRuleFilter ruleFilter = LifecycleRuleFilter.builder()
+                    .prefix("glacierobjects/")
+                    .build();
+
+            Transition transition = Transition.builder()
+                    .storageClass(TransitionStorageClass.GLACIER)
+                    .days(0)
+                    .build();
+
+            LifecycleRule rule1 = LifecycleRule.builder()
+                    .id("Archive immediately rule")
+                    .filter(ruleFilter)
+                    .transitions(transition)
+                    .status(ExpirationStatus.ENABLED)
+                    .build();
+
+            // Create a second rule.
+            Transition transition2 = Transition.builder()
+                    .storageClass(TransitionStorageClass.GLACIER)
+                    .days(0)
+                    .build();
+
+            List<Transition> transitionList = new ArrayList<>();
+            transitionList.add(transition2);
+
+            LifecycleRuleFilter ruleFilter2 = LifecycleRuleFilter.builder()
+                    .prefix("glacierobjects/")
+                    .build();
+
+            LifecycleRule rule2 = LifecycleRule.builder()
+                    .id("Archive and then delete rule")
+                    .filter(ruleFilter2)
+                    .transitions(transitionList)
+                    .status(ExpirationStatus.ENABLED)
+                    .build();
+
+            // Add the LifecycleRule objects to an ArrayList.
+            ArrayList<LifecycleRule> ruleList = new ArrayList<>();
+            ruleList.add(rule1);
+            ruleList.add(rule2);
+
+            BucketLifecycleConfiguration lifecycleConfiguration = BucketLifecycleConfiguration.builder()
+                    .rules(ruleList)
+                    .build();
+
+            PutBucketLifecycleConfigurationRequest putBucketLifecycleConfigurationRequest = PutBucketLifecycleConfigurationRequest
+                    .builder()
+                    .bucket(bucketName)
+                    .lifecycleConfiguration(lifecycleConfiguration)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            s3Client.putBucketLifecycleConfiguration(putBucketLifecycleConfigurationRequest);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Retrieves the lifecycle configuration for an Amazon S3 bucket and adds a new lifecycle rule to it.
+     *
+     * @param bucketName the name of the Amazon S3 bucket
+     * @param accountId the expected owner of the Amazon S3 bucket
+     */
+    @Override
+    public void getLifecycleConfig(String bucketName, String accountId){
+        try {
+            GetBucketLifecycleConfigurationRequest getBucketLifecycleConfigurationRequest = GetBucketLifecycleConfigurationRequest
+                    .builder()
+                    .bucket(bucketName)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            GetBucketLifecycleConfigurationResponse response = s3Client.getBucketLifecycleConfiguration(getBucketLifecycleConfigurationRequest);
+            List<LifecycleRule> newList = new ArrayList<>();
+            List<LifecycleRule> rules = response.rules();
+            for (LifecycleRule rule : rules) {
+                newList.add(rule);
+            }
+
+            // Add a new rule with both a prefix predicate and a tag predicate.
+            LifecycleRuleFilter ruleFilter = LifecycleRuleFilter.builder()
+                    .prefix("YearlyDocuments/")
+                    .build();
+
+            Transition transition = Transition.builder()
+                    .storageClass(TransitionStorageClass.GLACIER)
+                    .days(3650)
+                    .build();
+
+            LifecycleRule rule1 = LifecycleRule.builder()
+                    .id("NewRule")
+                    .filter(ruleFilter)
+                    .transitions(transition)
+                    .status(ExpirationStatus.ENABLED)
+                    .build();
+
+            // Add the new rule to the list.
+            newList.add(rule1);
+            BucketLifecycleConfiguration lifecycleConfiguration = BucketLifecycleConfiguration.builder()
+                    .rules(newList)
+                    .build();
+
+            PutBucketLifecycleConfigurationRequest putBucketLifecycleConfigurationRequest = PutBucketLifecycleConfigurationRequest
+                    .builder()
+                    .bucket(bucketName)
+                    .lifecycleConfiguration(lifecycleConfiguration)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            s3Client.putBucketLifecycleConfiguration(putBucketLifecycleConfigurationRequest);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Deletes the lifecycle configuration for an Amazon S3 bucket.
+     *
+     * @param bucketName the name of the S3 bucket
+     * @param accountId the expected account owner of the S3 bucket
+     *
+     * @throws S3Exception if an error occurs while deleting the lifecycle configuration
+     */
+    @Override
+    public void deleteLifecycleConfig(String bucketName, String accountId){
+        try {
+            DeleteBucketLifecycleRequest deleteBucketLifecycleRequest = DeleteBucketLifecycleRequest
+                    .builder()
+                    .bucket(bucketName)
+                    .expectedBucketOwner(accountId)
+                    .build();
+
+            s3Client.deleteBucketLifecycle(deleteBucketLifecycleRequest);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Sets the policy for an Amazon S3 bucket.
+     *
+     * @param bucketName the name of the Amazon S3 bucket
+     * @param policyText the text of the policy to be set on the bucket
+     * @throws S3Exception if there is an error setting the bucket policy
+     */
+    @Override
+    public void setPolicy(String bucketName, String policyText) {
+        System.out.println("Setting policy:");
+        System.out.println("----");
+        System.out.println(policyText);
+        System.out.println("----");
+        System.out.format("On Amazon S3 bucket: \"%s\"\n", bucketName);
+
+        try {
+            PutBucketPolicyRequest policyReq = PutBucketPolicyRequest.builder()
+                    .bucket(bucketName)
+                    .policy(policyText)
+                    .build();
+
+            s3Client.putBucketPolicy(policyReq);
+
+        } catch (S3Exception e) {
+            System.err.println(e.awsErrorDetails().errorMessage());
+            System.exit(1);
+        }
+
+        System.out.println("Done!");
+    }
+
+    /**
+     * Retrieves the bucket policy from a specified file.
+     *
+     * @param policyFile the path to the file containing the bucket policy
+     * @return the content of the bucket policy file as a string
+     */
+    @Override
+    public String getBucketPolicyFromFile(String policyFile) {
+        StringBuilder fileText = new StringBuilder();
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(policyFile), StandardCharsets.UTF_8);
+            for (String line : lines) {
+                fileText.append(line);
+            }
+
+        } catch (IOException e) {
+            System.out.format("Problem reading file: \"%s\"", policyFile);
+            System.out.println(e.getMessage());
+        }
+
+        try {
+            final JsonParser parser = new ObjectMapper().getFactory().createParser(fileText.toString());
+            while (parser.nextToken() != null) {
+            }
+
+        } catch (IOException jpe) {
+            jpe.printStackTrace();
+        }
+        return fileText.toString();
+    }
+
+    /**
+     * Performs a multipart upload to Amazon S3 using the provided S3 client.
+     *
+     * @param filePath the path to the file to be uploaded
+     */
+    @Override
+    public void multipartUploadWithS3Client(String bucketName, String key, String filePath) {
+
+        // Initiate the multipart upload.
+        CreateMultipartUploadResponse createMultipartUploadResponse = s3Client.createMultipartUpload(b -> b
+                .bucket(bucketName)
+                .key(key));
+        String uploadId = createMultipartUploadResponse.uploadId();
+
+        // Upload the parts of the file.
+        int partNumber = 1;
+        List<CompletedPart> completedParts = new ArrayList<>();
+        ByteBuffer bb = ByteBuffer.allocate(1024 * 1024 * 5); // 5 MB byte buffer
+
+        try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
+            long fileSize = file.length();
+            long position = 0;
+            while (position < fileSize) {
+                file.seek(position);
+                long read = file.getChannel().read(bb);
+
+                bb.flip(); // Swap position and limit before reading from the buffer.
+                UploadPartRequest uploadPartRequest = UploadPartRequest.builder()
+                        .bucket(bucketName)
+                        .key(key)
+                        .uploadId(uploadId)
+                        .partNumber(partNumber)
+                        .build();
+
+                UploadPartResponse partResponse = s3Client.uploadPart(
+                        uploadPartRequest,
+                        RequestBody.fromByteBuffer(bb));
+
+                CompletedPart part = CompletedPart.builder()
+                        .partNumber(partNumber)
+                        .eTag(partResponse.eTag())
+                        .build();
+                completedParts.add(part);
+
+                bb.clear();
+                position += read;
+                partNumber++;
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage());
+        }
+
+        // Complete the multipart upload.
+        s3Client.completeMultipartUpload(b -> b
+                .bucket(bucketName)
+                .key(key)
+                .uploadId(uploadId)
+                .multipartUpload(CompletedMultipartUpload.builder().parts(completedParts).build()));
+    }
+
 }

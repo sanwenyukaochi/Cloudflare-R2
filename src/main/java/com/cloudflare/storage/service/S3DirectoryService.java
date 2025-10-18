@@ -1,8 +1,10 @@
 package com.cloudflare.storage.service;
 
+import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -32,4 +34,24 @@ public interface S3DirectoryService {
     void putDirectoryBucketObject(String bucketName, String objectKey, Path filePath);
     List<CompletedPart> multipartUploadForDirectoryBucket(String bucketName, String objectKey, String uploadId, Path filePath) throws IOException;
     List<CompletedPart> multipartUploadCopyForDirectoryBucket(String sourceBucket, String sourceKey, String destinationBucket, String destinationKey, String uploadId);
+    String getObjectUrlForDirectoryBucket(String bucketName, String keyName);
+    void listTags(String bucketName, String keyName);
+    void getObjectBytes(String bucketName, String keyName, String path);
+    ObjectLockLegalHold getObjectLegalHold(String bucketName, String objectKey);
+    void getBucketObjectLockConfiguration(String bucketName);
+    ObjectLockRetention getObjectRetention(String bucketName, String key);
+    void listBucketObjects(String bucketName);
+    void setBucketAcl(String bucketName, String id);
+    void deleteBucketCorsInformation(String bucketName, String accountId);
+    void getBucketCorsInformation(String bucketName, String accountId);
+    void setCorsInformation(String bucketName, String accountId);
+    void setLifecycleConfig(String bucketName, String accountId);
+    void getLifecycleConfig(String bucketName, String accountId);
+    void deleteLifecycleConfig(String bucketName, String accountId);
+
+    void setPolicy(String bucketName, String policyText);
+
+    String getBucketPolicyFromFile(String policyFile);
+
+    void multipartUploadWithS3Client(String bucketName, String key, String filePath);
 }

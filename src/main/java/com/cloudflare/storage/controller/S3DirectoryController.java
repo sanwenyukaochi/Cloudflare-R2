@@ -170,8 +170,13 @@ public class S3DirectoryController {
     @Operation(summary = "分片复制", description = "通过分片方式复制大对象到目标位置")
     @PostMapping("/multipartUploadCopyForDirectoryBucket")
     public List<CompletedPart> multipartUploadCopyForDirectoryBucket(@Valid @RequestBody MultipartUploadCopyRequest req) {
-        return s3DirectoryService.multipartUploadCopyForDirectoryBucket(
-                req.sourceBucket(), req.sourceKey(), req.destinationBucket(), req.destinationKey(), req.uploadId()
-        );
+        return s3DirectoryService.multipartUploadCopyForDirectoryBucket(req.sourceBucket(), req.sourceKey(), req.destinationBucket(), req.destinationKey(), req.uploadId());
     }
+
+    @Operation(summary = "获取对象访问 URL", description = "根据存储桶名称和对象键获取该对象的访问 URL，可用于下载或直接访问")
+    @PostMapping("/getObjectUrlForDirectoryBucket")
+    public String getObjectUrlForDirectoryBucket(@Valid @RequestBody GetObjectUrlRequest req) {
+        return s3DirectoryService.getObjectUrlForDirectoryBucket(req.bucketName(), req.objectKey());
+    }
+
 }
